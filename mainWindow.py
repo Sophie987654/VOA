@@ -4,9 +4,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from qt_material import *
 from datetime import *
-from whisper_mic.whisper_mic import WhisperMic
+import speech_recognition as sr
 from konlpy.tag import Okt
 
 from settings import *
@@ -14,6 +13,7 @@ from src.module.face_detection import *
 from src.module.TAGO_data import *
 from ui.mainUI import UI_MainWindow
 from ui.selStationUI import UI_SelStation
+from qt_material import *
 
 
 class MainWindow(QMainWindow):
@@ -26,14 +26,14 @@ class MainWindow(QMainWindow):
             'font_family': '나눔고딕'
         }
         apply_stylesheet(app, theme='light_blue.xml',
-                         invert_secondary=True, extra=extra)
+                            invert_secondary=True, extra=extra)
         stylesheet = app.styleSheet()
         with open('src/theme/my_theme.css') as file:
             app.setStyleSheet(stylesheet + file.read().format(**os.environ))
-        
+
         UI_MainWindow.setupUI(self)
-        # self.showFullScreen()
-        self.show()
+        self.showFullScreen()
+        # self.show()
 
         while True:
             if gVar.locateSelf:
@@ -164,12 +164,25 @@ class MainWindow(QMainWindow):
                     else:
                         pyTTS("삐이이 소리 후 다시 말씀해주세요.")
                     
-                    self.mic = WhisperMic('small')
                     frequency = 500  # 소리의 주파수 (Hz)
                     duration = 500  # 소리의 지속 시간 (밀리초)
                     winsound.Beep(frequency, duration)
-                    result = self.mic.listen()
-                    print(result)
+
+                    r = sr.Recognizer()
+                    with sr.Microphone() as source:
+                        print("Say something!")
+                        audio = r.listen(source)
+                    
+                    result = ""
+                    # 구글 웹 음성 API로 인식하기 (하루에 제한 50회)
+                    try:
+                        result = r.recognize_google(audio, language='ko')
+                        print(result)
+                    except sr.UnknownValueError:
+                        print("Google Speech Recognition could not understand audio")
+                    except sr.RequestError as e:
+                        print("Could not request results from Google Speech Recognition service; {0}".format(e))
+                    
 
                     okt = Okt()
                     pos = okt.nouns(result)
@@ -182,7 +195,7 @@ class MainWindow(QMainWindow):
                         if n in station:
                             print(n + "역 있음")
                             gVar.station = n
-                            
+
                             pyTTS(n + "역이 맞으면 화면을 터치해주세요.")
                             gVar.pause = 1
 
@@ -197,6 +210,7 @@ class MainWindow(QMainWindow):
                         gVar.currentP = "selDate"
                     else:
                         gVar.pause = 0
+                        
     def leave(self):
         self.go_to_main()
         text = "자리 비움이 감지되어 처음으로 돌아갑니다."
