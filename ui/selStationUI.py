@@ -33,10 +33,11 @@ class UI_SelStation(object):
         
         # -------------------- 뒤로가기 버튼 --------------------
         self.backBtn = QPushButton()
-        if (w < h):
+        if (w > h):
             self.backBtn.setMaximumSize(int(w*0.05), int(w*0.05))
         else:
             self.backBtn.setMaximumSize(int(h*0.05), int(h*0.05))
+        self.backBtn.setSizePolicy(exExSP)
         self.backBtn.setText("뒤로\n가기")
         self.backBtn.setStyleSheet(
             medianFont +
@@ -45,10 +46,11 @@ class UI_SelStation(object):
         self.backBtn.clicked.connect(self.go_to_main)
         # -------------------- 처음으로 버튼 --------------------
         self.homeBtn = QPushButton()
-        if (w < h):
+        if (w > h):
             self.homeBtn.setMaximumSize(int(w*0.05), int(w*0.05))
         else:
             self.homeBtn.setMaximumSize(int(h*0.05), int(h*0.05))
+        self.homeBtn.setSizePolicy(exExSP)
         self.homeBtn.setText("처음\n으로")
         self.homeBtn.setStyleSheet(
             medianFont +
