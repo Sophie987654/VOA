@@ -18,7 +18,7 @@ class UI_MainWindow(object):
         self.buyBtn.setMinimumSize(int(w*0.2), int(h*0.1))
         self.buyBtn.clicked.connect(self.go_to_selStation)
         self.buyBtn.setStyleSheet(
-            largeFont
+            extraLargeFont
         )
 
         self.refundBtn = QPushButton(self.centralwidget)
@@ -26,7 +26,7 @@ class UI_MainWindow(object):
         self.refundBtn.setSizePolicy(exExSP)
         self.refundBtn.setMinimumSize(int(w*0.2), int(h*0.1))
         self.refundBtn.setStyleSheet(
-            largeFont
+            extraLargeFont
         )
 
         self.findBtn = QPushButton(self.centralwidget)
@@ -34,7 +34,7 @@ class UI_MainWindow(object):
         self.findBtn.setSizePolicy(exExSP)
         self.findBtn.setMinimumSize(int(w*0.2), int(h*0.1))
         self.findBtn.setStyleSheet(
-            largeFont
+            extraLargeFont
         )
 
         self.cancelBtn = QPushButton(self.centralwidget)
@@ -42,7 +42,7 @@ class UI_MainWindow(object):
         self.cancelBtn.setSizePolicy(exExSP)
         self.cancelBtn.setMinimumSize(int(w*0.2), int(h*0.1))
         self.cancelBtn.setStyleSheet(
-            largeFont
+            extraLargeFont
         )
 
         

@@ -39,7 +39,7 @@ class MainWindow(QMainWindow):
             if gVar.locateSelf:
                 self.timer = QTimer()
                 self.timer.timeout.connect(self.repeatThis)
-                self.timer.start(10000)
+                self.timer.start(20000)
             
             if (self.startCam()):
                 if gVar.currentP == "main":
