@@ -17,6 +17,7 @@ class gVar:
     no_face_cnt = 0
     station = ""
     firstAsk = True
+    darkMode = False
 
     def gVarInit():
         gVar.mode = "voice"
@@ -28,6 +29,7 @@ class gVar:
         gVar.no_face_cnt = 0
         gVar.station = ""
         gVar.firstAsk = True
+        gVar.darkMode = False
 
 
 # 현재 화면의 크기
@@ -57,12 +59,15 @@ extraLargefontSize = str(int(h*0.03))
 extraLargeFont = "font-size: " + extraLargefontSize + "px;"
 
 
-# main color
+# color palette
 blue = "rgb(41, 121, 255)"
 white = "rgb(255, 255, 255)"
 black = "rgb(0, 0, 0)"
 lightGray = "rgb(195, 195, 195)"
-transparent = "rgba(255, 255, 255, 1)"
+transparent = "rgba(255, 255, 255, 0)"
+teal = "rgb(29, 233, 182)"
+darkGray = "rgb(35, 38, 41)"
+
 
 def pyTTS(txt):
     engine = pyttsx3.init()

@@ -4,6 +4,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from qt_material import *
 from datetime import *
 import speech_recognition as sr
 from konlpy.tag import Okt
@@ -13,7 +14,6 @@ from src.module.face_detection import *
 from src.module.TAGO_data import *
 from ui.mainUI import UI_MainWindow
 from ui.selStationUI import UI_SelStation
-from qt_material import *
 
 
 class MainWindow(QMainWindow):
@@ -26,14 +26,11 @@ class MainWindow(QMainWindow):
             'font_family': '나눔고딕'
         }
         apply_stylesheet(app, theme='light_blue.xml',
-                            invert_secondary=True, extra=extra)
-        stylesheet = app.styleSheet()
-        with open('src/theme/my_theme.css') as file:
-            app.setStyleSheet(stylesheet + file.read().format(**os.environ))
-
+                         invert_secondary=True, extra=extra)
+        
         UI_MainWindow.setupUI(self)
-        self.showFullScreen()
-        # self.show()
+        # self.showFullScreen()
+        self.show()
 
         while True:
             if gVar.locateSelf:
@@ -48,6 +45,13 @@ class MainWindow(QMainWindow):
                     gVar.currentP = "selStation"
 
                     if gVar.menu == 1:
+                        gVar.darkMode = True
+                        extra = {
+                            'font_family': '나눔고딕'
+                        }
+                        apply_stylesheet(app, theme='dark_teal.xml',
+                                        invert_secondary=False, extra=extra)
+                        
                         self.setCentralWidget(None)
                         UI_SelStation.setupUI(self)
                         gVar.currentP = "selStation"
@@ -84,6 +88,11 @@ class MainWindow(QMainWindow):
             self.later = self.now + timedelta(seconds=3)
     
     def go_to_main(self):
+        extra = {
+            'font_family': '나눔고딕'
+        }
+        apply_stylesheet(app, theme='light_blue.xml',
+                         invert_secondary=True, extra=extra)
         gVar.gVarInit()
         gVar.face_cnt = -160
 
@@ -215,8 +224,8 @@ class MainWindow(QMainWindow):
         self.go_to_main()
         text = "자리 비움이 감지되어 처음으로 돌아갑니다."
         pyTTS(text)
-                
-
+    
+    
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
