@@ -1,5 +1,3 @@
-import pyautogui
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -12,6 +10,8 @@ from src.module.TAGO_data import *
 
 
 class UI_SelStation(object):
+    page = 1
+
     def setupUI(self):
         if gVar.darkMode:
             primary_color = teal
@@ -81,7 +81,7 @@ class UI_SelStation(object):
             medianFont +
             "color: " + secondary_text_color + ";")
         
-        self.depContLabel = QLabel("서울")
+        self.depContLabel = QLabel(gVar.depStat)
         self.depContLabel.setSizePolicy(exExSP)
         self.depContLabel.setMaximumSize(int(w/2), int(w/2))
         self.depContLabel.setAlignment(Qt.AlignCenter)
@@ -105,7 +105,7 @@ class UI_SelStation(object):
             medianFont +
             "color: " + primary_text_color + ";")
         
-        self.arrContLabel = QLabel("부산")
+        self.arrContLabel = QLabel(gVar.arrStat)
         self.arrContLabel.setSizePolicy(exExSP)
         self.arrContLabel.setMaximumSize(int(w/2), int(w/2))
         self.arrContLabel.setAlignment(Qt.AlignCenter)
@@ -144,8 +144,10 @@ class UI_SelStation(object):
             for j in range(0, 3):
                 selStat[i][j].setText(impStat[i][j])
                 selStat[i][j].setSizePolicy(exExSP)
+                selStat[i][j].setMaximumSize(int(w/3), int(h*0.1))
                 selStat[i][j].setStyleSheet(
                 largeFont)
+                selStat[i][j].clicked.connect(self.go_to_selDepDate)
 
         # ==================== Footer ====================
         # -------------------- 이전 페이지 --------------------
@@ -198,6 +200,7 @@ class UI_SelStation(object):
         # -------------------- Settings --------------------
         self.mainLayout.setAlignment(Qt.AlignCenter)
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.setSpacing(0)
 
         self.hearderLayout.setContentsMargins(
             int(w*0.01), int(h*0.01), int(w*0.01), int(h*0.01))
@@ -241,65 +244,64 @@ class UI_SelStation(object):
         self.footerLayout.addWidget(self.nextBtn)
     
 
-    global page
-    page = 1
-
     def clicked_preBtn(self):
-        global GpreBtn, GnextBtn, page
+        global GpreBtn, GnextBtn
 
-        if page == 2:
-            if gVar.darkMode:
-                icon = QIcon(img_path + "offPreBtn_dark.png")
-            else:
-                icon = QIcon(img_path + "offPreBtn.png")
-            GpreBtn.setIcon(icon)
+        if gVar.clickAble:
+            if UI_SelStation.page == 2:
+                if gVar.darkMode:
+                    icon = QIcon(img_path + "offPreBtn_dark.png")
+                else:
+                    icon = QIcon(img_path + "offPreBtn.png")
+                GpreBtn.setIcon(icon)
 
-            for i in range(0, 5):
-                for j in range(0, 3):
-                    selStat[i][j].setText(impStat[i][j])
-            
-            page = 1
-        elif page == 3:
-            if gVar.darkMode:
-                icon = QIcon(img_path + "nextBtn_dark.png")
-            else:
-                icon = QIcon(img_path + "nextBtn.png")
-            GnextBtn.setIcon(icon)
+                for i in range(0, 5):
+                    for j in range(0, 3):
+                        selStat[i][j].setText(impStat[i][j])
+                
+                UI_SelStation.page = 1
+            elif UI_SelStation.page == 3:
+                if gVar.darkMode:
+                    icon = QIcon(img_path + "nextBtn_dark.png")
+                else:
+                    icon = QIcon(img_path + "nextBtn.png")
+                GnextBtn.setIcon(icon)
 
-            for i in range(0, 5):
-                for j in range(0, 3):
-                    selStat[i][j].setText(impStat[i+5][j])
-            
-            page = 2
+                for i in range(0, 5):
+                    for j in range(0, 3):
+                        selStat[i][j].setText(impStat[i+5][j])
+                
+                UI_SelStation.page = 2
 
     def clicked_nextBtn(self):
         global GpreBtn, GnextBtn
-        global selStat, page
-        
-        if page == 1:
-            if gVar.darkMode:
-                icon = QIcon(img_path + "preBtn_dark.png")
-            else:
-                icon = QIcon(img_path + "PreBtn.png")
-            GpreBtn.setIcon(icon)
+        global selStat
 
-            for i in range(0, 5):
-                for j in range(0, 3):
-                    selStat[i][j].setText(impStat[i+5][j])
-            
-            page = 2
-        elif page == 2:
-            for i in range(0, 5):
-                for j in range(0, 3):
-                    if (impStat[i+10][j] == ""):
-                        selStat[i][j].setText("")
-                    else:
-                        selStat[i][j].setText(impStat[i+10][j])
-            
-            if gVar.darkMode:
-                icon = QIcon(img_path + "offNextBtn_dark.png")
-            else:
-                icon = QIcon(img_path + "offNextBtn.png")
-            GnextBtn.setIcon(icon)
+        if gVar.clickAble:
+            if UI_SelStation.page == 1:
+                if gVar.darkMode:
+                    icon = QIcon(img_path + "preBtn_dark.png")
+                else:
+                    icon = QIcon(img_path + "PreBtn.png")
+                GpreBtn.setIcon(icon)
 
-            page = 3
+                for i in range(0, 5):
+                    for j in range(0, 3):
+                        selStat[i][j].setText(impStat[i+5][j])
+                
+                UI_SelStation.page = 2
+            elif UI_SelStation.page == 2:
+                for i in range(0, 5):
+                    for j in range(0, 3):
+                        if (impStat[i+10][j] == ""):
+                            selStat[i][j].setText("")
+                        else:
+                            selStat[i][j].setText(impStat[i+10][j])
+                
+                if gVar.darkMode:
+                    icon = QIcon(img_path + "offNextBtn_dark.png")
+                else:
+                    icon = QIcon(img_path + "offNextBtn.png")
+                GnextBtn.setIcon(icon)
+
+                UI_SelStation.page = 3

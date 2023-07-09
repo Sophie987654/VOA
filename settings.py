@@ -1,5 +1,6 @@
 import pyautogui, pygame, pyttsx3
 from gtts import gTTS
+from datetime import *
 
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import *
@@ -8,28 +9,42 @@ from PyQt5.QtWidgets import *
 
 
 class gVar:
-    mode = "voice"
+    mode = "touch"
     locateSelf = True
     currentP = "main"
     pause = 0
     menu = 1
     face_cnt = 0
     no_face_cnt = 0
-    station = ""
     firstAsk = True
     darkMode = False
+    clickAble = True
+    
+    depStat = "서울"
+    arrStat = ""
+    depDate = datetime.today().strftime("%Y%m%d")
+    depTime = datetime.today().strftime("%H%M")
+    knd = "KTX"
+    notExist = False
 
     def gVarInit():
-        gVar.mode = "voice"
+        gVar.mode = "touch"
         gVar.locateSelf = True
         gVar.currentP = "main"
         gVar.pause = 0
         gVar.menu = 1
         gVar.face_cnt = 0
         gVar.no_face_cnt = 0
-        gVar.station = ""
         gVar.firstAsk = True
         gVar.darkMode = False
+        gVar.clickAble = True
+
+        gVar.depStat = "서울"
+        gVar.arrStat = ""
+        gVar.depDate = datetime.today().strftime("%Y%m%d")
+        gVar.depTime = datetime.today().strftime("%H%M")
+        gVar.knd = "KTX"
+        gVar.notExist = False
 
 
 # 현재 화면의 크기
@@ -67,7 +82,8 @@ lightGray = "rgb(195, 195, 195)"
 transparent = "rgba(255, 255, 255, 0)"
 teal = "rgb(29, 233, 182)"
 darkGray = "rgb(35, 38, 41)"
-
+red = "rgb(255, 0, 0)"
+lightBlue = "rgb(0, 176, 255)"
 
 def pyTTS(txt):
     engine = pyttsx3.init()

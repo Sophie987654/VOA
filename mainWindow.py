@@ -11,9 +11,11 @@ from konlpy.tag import Okt
 
 from settings import *
 from src.module.face_detection import *
+from src.module.TAGO import *
 from src.module.TAGO_data import *
 from ui.mainUI import UI_MainWindow
 from ui.selStationUI import UI_SelStation
+from ui.selDepDateUI import UI_SelDepDate
 
 
 class MainWindow(QMainWindow):
@@ -40,41 +42,29 @@ class MainWindow(QMainWindow):
             
             if (self.startCam()):
                 if gVar.currentP == "main":
-                    gVar.locateSelf = False
-                    self.timer.stop()
-                    gVar.currentP = "selStation"
-
                     if gVar.menu == 1:
-                        gVar.darkMode = True
-                        extra = {
-                            'font_family': '나눔고딕'
-                        }
-                        apply_stylesheet(app, theme='dark_teal.xml',
-                                        invert_secondary=False, extra=extra)
-                        
-                        self.setCentralWidget(None)
-                        UI_SelStation.setupUI(self)
-                        gVar.currentP = "selStation"
-            else:
-                pass
+                        self.go_to_selStation()
+                elif gVar.currentP == "selStation":
+                    self.go_to_selDepDate()
             
     def closeEvent(self, event):
         UI_MainWindow.cap.release()
         sys.exit()
 
     def mousePressEvent(self, event):
+        # detect mouse click
         if event.buttons() & Qt.LeftButton:
             print("터치")
             if gVar.currentP == "main":
                 if gVar.pause == 1: # 음성안내 종료
                     pyTTS("음성안내를 종료합니다.")
-                    gVar.pause = -1
+                    gVar.pause = 0
+                    gVar.face_cnt = - 160
                 elif gVar.pause == 2:
                     gVar.menu = 2
             elif gVar.currentP == "selStation":
                 if gVar.pause == 1:
                     gVar.pause = 2
-                
     
     def repeatThis(self):
         pyTTS("음성안내 기능이 있는 키오스크 입니다.")
@@ -88,31 +78,83 @@ class MainWindow(QMainWindow):
             self.later = self.now + timedelta(seconds=3)
     
     def go_to_main(self):
-        extra = {
-            'font_family': '나눔고딕'
-        }
-        apply_stylesheet(app, theme='light_blue.xml',
-                         invert_secondary=True, extra=extra)
-        gVar.gVarInit()
-        gVar.face_cnt = -160
+        if gVar.clickAble:
+            extra = {
+                'font_family': '나눔고딕'
+            }
+            apply_stylesheet(app, theme='light_blue.xml',
+                                invert_secondary=True, extra=extra)
+            gVar.gVarInit()
+            gVar.face_cnt = -160
 
-        self.setCentralWidget(None)
-        UI_MainWindow.setupUI(self)
+            self.setCentralWidget(None)
+            UI_MainWindow.setupUI(self)
+        else:
+            if gVar.currentP == "selStation":
+                if gVar.pause == 1:
+                    gVar.pause = 2
 
     def go_to_selStation(self):
-        gVar.mode = "touch"
-        gVar.locateSelf = False
-        self.timer.stop()
-        gVar.currentP = "selStation"
+        UI_SelStation.page = 1
 
-        self.setCentralWidget(None)
-        UI_SelStation.setupUI(self)
+        if gVar.mode == "touch":
+            gVar.locateSelf = False
+            self.timer.stop()
+            UI_SelStation.page = 1
+            gVar.currentP = "selStation"
+
+            self.setCentralWidget(None)
+            UI_SelStation.setupUI(self)
+        elif gVar.mode == "voice":
+            gVar.pause = 0
+            arrStat = ""
+            gVar.clickAble = True
+            gVar.firstAsk = True
+
+            if gVar.clickAble:
+                gVar.darkMode = True
+                extra = {
+                    'font_family': '나눔고딕'
+                }
+                apply_stylesheet(app, theme='dark_teal.xml',
+                                invert_secondary=False, extra=extra)
+                
+                self.setCentralWidget(None)
+                UI_SelStation.setupUI(self)
+                gVar.currentP = "selStation"
+            else:
+                if gVar.currentP == "selStation":
+                    if gVar.pause == 1:
+                        gVar.pause = 2
+
+    @pyqtSlot()
+    def go_to_selDepDate(self):
+        if gVar.clickAble:
+            if gVar.mode == "touch":
+                clicked_button = self.sender()
+                gVar.arrStat = clicked_button.text()
+                self.arrContLabel.setText(gVar.arrStat)
+
+            getData(gVar.depStat, gVar.arrStat,
+                    gVar.depDate, gVar.depTime, gVar.knd)
+            
+            if gVar.notExist == True:
+                pyTTS("해당 역으로 가는 열차가 없습니다. 다시 선택해주세요.")
+                gVar.pause = 0
+                arrStat = ""
+                gVar.clickAble = True
+            else:
+                self.setCentralWidget(None)
+                UI_SelDepDate.setupUI(self)
+                gVar.currentP = "selDepDate"
+        else:
+            if gVar.currentP == "selStation":
+                if gVar.pause == 1:
+                    gVar.pause = 2
 
     def startCam(self):
         # Camera preparation ###############################################################
         UI_MainWindow.cap = cv2.VideoCapture(0)
-        camOff = False
-        startAgain = 0
 
         while UI_MainWindow.cap.isOpened():
             # Process Key (ESC: end) #################################################
@@ -131,40 +173,37 @@ class MainWindow(QMainWindow):
             image.flags.writeable = False
             image.flags.writeable = True
 
-            if (faceDetection(image) == False):
-                self.go_to_main()
-                text = "자리 비움이 감지되어 처음으로 돌아갑니다."
-                pyTTS(text)
-                return False
-
+            if gVar.mode == "voice":
+                if (faceDetection(image) == False):
+                    self.go_to_main()
+                    text = "자리 비움이 감지되어 처음으로 돌아갑니다."
+                    pyTTS(text)
+                    return False
+            
             if gVar.currentP == "main":
-                if gVar.pause == -1:
-                    if (faceDetection(image)):
-                        startAgain += 1
-                        if startAgain == 3:
-                            gVar.pause = 0
-                
                 if gVar.pause == 0:
                     if (faceDetection(image)):
                         gVar.locateSelf = False
                         self.timer.stop()
-
+                        
                         text = "음성안내를 시작합니다. 음성안내를 원하지 않으면 화면을 터치해주세요."
                         pyTTS(text)
                         gVar.pause = 1
                         self.delay()
 
-                if gVar.pause == 1:
+                elif gVar.pause == 1:
                     if datetime.now() >= self.later:
+                        gVar.mode = "voice"
                         text = "승차권 구매를 시작합니다. 구매가 아니라 승차권 환불, 예약표 찾기, 예약 취소를 원하시면 화면을 터치해주세요."
                         pyTTS(text)
                         gVar.pause = 2
                         self.delay()
 
-                if gVar.pause == 2:
+                elif gVar.pause == 2:
                     if datetime.now() >= self.later:
                         gVar.pause = 0
                         return True
+                    
             elif gVar.currentP == "selStation" and gVar.mode == "voice":
                 if gVar.pause == 0:
                     if gVar.firstAsk:
@@ -189,45 +228,44 @@ class MainWindow(QMainWindow):
                         print(result)
                     except sr.UnknownValueError:
                         print("Google Speech Recognition could not understand audio")
+                        pyTTS("음성을 이해할 수 없습니다.")
                     except sr.RequestError as e:
                         print("Could not request results from Google Speech Recognition service; {0}".format(e))
                     
-
+                    # 형태소 분석
                     okt = Okt()
-                    pos = okt.nouns(result)
-                    print(pos)
+                    nouns = okt.nouns(result)
+                    print(nouns)
 
-                    for n in pos:
+                    for n in nouns:
                         if n.endswith("역"):
                             n = n[:-1]
-
+                        
                         if n in station:
                             print(n + "역 있음")
-                            gVar.station = n
+                            gVar.arrStat = n
 
-                            pyTTS(n + "역이 맞으면 화면을 터치해주세요.")
+                            gVar.clickAble = False
+                            pyTTS(gVar.arrStat +
+                                  "역이 맞으면 화면을 터치해주세요.")
                             gVar.pause = 1
 
-                            self.arrContLabel.setText(n)
-
-                            self.delay()                                
+                            self.delay()
                             break
 
                 if datetime.now() >= self.later:
                     if gVar.pause == 2:
-                        pyTTS(n + "역을 선택하셨습니다.")
-                        gVar.currentP = "selDate"
-                    else:
+                        self.arrContLabel.setText(gVar.arrStat)
+                        gVar.clickAble = True
+
+                        pyTTS(gVar.arrStat + "역이 선택되었습니다.")
+                        return True
+                    elif gVar.pause == 1:
                         gVar.pause = 0
-                        
-    def leave(self):
-        self.go_to_main()
-        text = "자리 비움이 감지되어 처음으로 돌아갑니다."
-        pyTTS(text)
     
     
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
-
+    
     sys.exit(app.exec_())

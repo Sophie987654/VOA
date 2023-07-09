@@ -1,6 +1,7 @@
 import requests
 import json
 from pandas import json_normalize
+from settings import *
 from src.module.TAGO_data import *
 
 key = "0xs+oSKQksWdfMFsi+mP8Tuc9/xe+e6oqMRn4St5c0ffbe7SsWaeaMwR3LICld+RNhOJArZ/G4W5bFkZB18wEw=="
@@ -15,8 +16,7 @@ def res(url, params):
 
     data = json.loads(text)
     df = json_normalize(data['response']['body']['items']['item'])
-    # print(df)
-
+    
     global flag
     if (flag):
         global trainInfoDf
@@ -55,44 +55,46 @@ def trainInfo(dep, arr, depDay, knd):
     trainGradeCode = knd   #차량종류코드
     
     url = 'http://apis.data.go.kr/1613000/TrainInfoService/getStrtpntAlocFndTrainInfo'
-    params ={'serviceKey' : key,
-            'pageNo' : '1', 'numOfRows' : '100', '_type' : 'json',
-            'depPlaceId' : depPlaceId, 'arrPlaceId' : arrPlaceId,
-            'depPlandTime' : depPlandTime, 'trainGradeCode' : trainGradeCode }
-
-    res(url, params)
-
-def getData():
-    global flag
     
-    dep = input("출발지를 입력하세요: ")
-    arr = input("도착지를 입력하세요: ")
-    depDay = input("출발일을 입력하세요: ")
-    depTime = input("출발 시간을 입력하세요: ")
-    knd = input("열차 종류를 입력하세요: ")
+    if gVar.currentP == "selStation":
+        params ={'serviceKey' : key,
+                'pageNo' : '1', 'numOfRows' : '100', '_type' : 'json',
+                'depPlaceId' : depPlaceId, 'arrPlaceId' : arrPlaceId,
+                'depPlandTime' : depPlandTime }
+    else:
+        params ={'serviceKey' : key,
+                'pageNo' : '1', 'numOfRows' : '100', '_type' : 'json',
+                'depPlaceId' : depPlaceId, 'arrPlaceId' : arrPlaceId,
+                'depPlandTime' : depPlandTime, 'trainGradeCode' : trainGradeCode }
 
-    dep = station[dep]
-    arr = station[arr]
-    knd = vhcleKnd[knd]
-    print(
-        "-------입력 내용------" +
-        "\n출발지 " + dep +
-        "\n도착지 " + arr +
-        "\n출발일 " + depDay +
-        "\n열차 종류 " + knd
-    )
+    try:
+        res(url, params)
+    except:
+        gVar.notExist = True
+        pass
+
+def getData(depStat, arrStat, depDay, depTime, knd):
+    global flag, trainInfoDf
+    
+    dep = station[depStat]
+    arr = station[arrStat]
+    knd = trainKnd[knd]
 
     flag = True
     trainInfo(dep, arr, depDay, knd)
-    deptimeList = trainInfoDf['depplandtime'].tolist()
-    # print(deptimeList)
 
-    i = 0
-    for time in deptimeList:
-        time = int(str(time)[8:12])
-        if (time - int(depTime) > 0):
-            break
-        i += 1
+    if (gVar.notExist == False):
+        deptimeList = trainInfoDf['depplandtime'].tolist()
+        # print(deptimeList)
 
-    lastIndex = trainInfoDf.shape[0]
-    print(trainInfoDf.tail(lastIndex - i))
+        i = 0
+        for time in deptimeList:
+            time = int(str(time)[8:12])
+            if (time - int(depTime) > 0):
+                break
+            i += 1
+
+            lastIndex = trainInfoDf.shape[0]
+            print(trainInfoDf.tail(lastIndex - i))
+    else:
+        pass
