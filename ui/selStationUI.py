@@ -11,7 +11,7 @@ from src.module.TAGO_data import *
 
 class UI_SelStation(object):
     page = 1
-
+        
     def setupUI(self):
         if gVar.darkMode:
             primary_color = teal
@@ -23,44 +23,45 @@ class UI_SelStation(object):
             secondary_color = "rgb(255, 255, 255)" # white
             primary_text_color = "rgb(255, 255, 255)" # white
             secondary_text_color = "rgb(0, 0, 0)" # black
-        
+            
         self.centralwidget = QWidget(self)
         self.setCentralWidget(self.centralwidget)
+        self.centralwidget.installEventFilter(self)  # eventFilter를 central_widget에 설치
 
         # ==================== Header ====================
         self.headerFrame = QFrame()
         self.headerFrame.setMaximumSize(w, int(h*0.1))
         self.headerFrame.setSizePolicy(exExSP)
         self.headerFrame.setStyleSheet(
-            "background-color: " + primary_color + ";")
+            "background-color: " + myColor.primary_color + ";")
         
         self.headerLabel = QLabel("승차권 예매")
         self.headerLabel.setSizePolicy(exExSP)
         self.headerLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.headerLabel.setStyleSheet(
             extraLargeFont +
-            "color: " + primary_text_color + ";")
+            "color: " + myColor.primary_text_color + ";")
         
         # -------------------- 뒤로가기 버튼 --------------------
         self.backBtn = QPushButton()
-        self.backBtn.setMaximumSize(int(h*0.15), int(h*0.1))
+        self.backBtn.setFixedSize(int(h*0.15), int(h*0.08))
         self.backBtn.setSizePolicy(exExSP)
         self.backBtn.setText("뒤로\n가기")
         self.backBtn.setStyleSheet(
             largeFont +
-            "color: " + secondary_text_color + ";"
-            "background-color: " + secondary_color + ";")
+            "color: " + myColor.secondary_text_color + ";"
+            "background-color: " + myColor.secondary_color + ";")
         self.backBtn.clicked.connect(self.go_to_main)
 
         # -------------------- 처음으로 버튼 --------------------
         self.homeBtn = QPushButton()
-        self.homeBtn.setMaximumSize(int(h*0.15), int(h*0.1))
+        self.homeBtn.setFixedSize(int(h*0.15), int(h*0.08))
         self.homeBtn.setSizePolicy(exExSP)
         self.homeBtn.setText("처음\n으로")
         self.homeBtn.setStyleSheet(
             largeFont +
-            "color: " + secondary_text_color + ";"
-            "background-color: " + secondary_color + ";")
+            "color: " + myColor.secondary_text_color + ";"
+            "background-color: " + myColor.secondary_color + ";")
         self.homeBtn.clicked.connect(self.go_to_main)
         
 
@@ -70,7 +71,7 @@ class UI_SelStation(object):
         self.depFrame.setMaximumSize(w, int(h*0.1))
         self.depFrame.setSizePolicy(exExSP)
         self.depFrame.setStyleSheet(
-            "background-color: " + secondary_color + ";"
+            "background-color: " + myColor.secondary_color + ";"
             "border-radius: " + str(int(h*0.01)) + ";")
         
         self.depTitleLabel = QLabel("출발")
@@ -79,7 +80,7 @@ class UI_SelStation(object):
         self.depTitleLabel.setAlignment(Qt.AlignCenter)
         self.depTitleLabel.setStyleSheet(
             medianFont +
-            "color: " + secondary_text_color + ";")
+            "color: " + myColor.secondary_text_color + ";")
         
         self.depContLabel = QLabel(gVar.depStat)
         self.depContLabel.setSizePolicy(exExSP)
@@ -87,14 +88,14 @@ class UI_SelStation(object):
         self.depContLabel.setAlignment(Qt.AlignCenter)
         self.depContLabel.setStyleSheet(
             largeFont +
-            "color: " + secondary_text_color + ";")
+            "color: " + myColor.secondary_text_color + ";")
         
         # -------------------- 도착 --------------------
         self.arrFrame = QFrame()
         self.arrFrame.setMaximumSize(w, int(h*0.1))
         self.arrFrame.setSizePolicy(exExSP)
         self.arrFrame.setStyleSheet(
-            "background-color: " + primary_color + ";"
+            "background-color: " + myColor.primary_color + ";"
             "border-radius: " + str(int(h*0.01)) + ";")
         
         self.arrTitleLabel = QLabel("도착")
@@ -103,7 +104,7 @@ class UI_SelStation(object):
         self.arrTitleLabel.setAlignment(Qt.AlignCenter)
         self.arrTitleLabel.setStyleSheet(
             medianFont +
-            "color: " + primary_text_color + ";")
+            "color: " + myColor.primary_text_color + ";")
         
         self.arrContLabel = QLabel(gVar.arrStat)
         self.arrContLabel.setSizePolicy(exExSP)
@@ -111,7 +112,7 @@ class UI_SelStation(object):
         self.arrContLabel.setAlignment(Qt.AlignCenter)
         self.arrContLabel.setStyleSheet(
             largeFont +
-            "color: " + primary_text_color + ";")
+            "color: " + myColor.primary_text_color + ";")
         
 
         # ==================== 역 선택 ====================
@@ -147,7 +148,10 @@ class UI_SelStation(object):
                 selStat[i][j].setMaximumSize(int(w/3), int(h*0.1))
                 selStat[i][j].setStyleSheet(
                 largeFont)
-                selStat[i][j].clicked.connect(self.go_to_selDepDate)
+                if gVar.mode == "touch":
+                    selStat[i][j].clicked.connect(self.go_to_selDepDate)
+                elif gVar.mode == "voice":
+                    selStat[i][j].installEventFilter(self)
 
         # ==================== Footer ====================
         # -------------------- 이전 페이지 --------------------
@@ -165,8 +169,11 @@ class UI_SelStation(object):
         self.preBtn.setIconSize(
             QSize(self.preBtn.sizeHint().height(),
                   self.preBtn.sizeHint().height()))
-        self.preBtn.clicked.connect(UI_SelStation.clicked_preBtn)
-        
+        if gVar.mode == "touch":
+            self.preBtn.clicked.connect(UI_SelStation.clicked_preBtn)
+        elif gVar.mode == "voice":
+            self.preBtn.installEventFilter(self)
+
         # -------------------- 다음 페이지 --------------------
         if gVar.darkMode:
             icon = QIcon(img_path + "nextBtn_dark.png")
@@ -182,8 +189,11 @@ class UI_SelStation(object):
         self.nextBtn.setIconSize(
             QSize(self.nextBtn.sizeHint().height(),
                   self.nextBtn.sizeHint().height()))
-        self.nextBtn.clicked.connect(UI_SelStation.clicked_nextBtn)
-
+        if gVar.mode == "touch":
+            self.nextBtn.clicked.connect(UI_SelStation.clicked_nextBtn)
+        elif gVar.mode == "voice":
+            self.nextBtn.installEventFilter(self)
+        
         global GpreBtn, GnextBtn
         GpreBtn = self.preBtn
         GnextBtn = self.nextBtn
@@ -246,62 +256,60 @@ class UI_SelStation(object):
 
     def clicked_preBtn(self):
         global GpreBtn, GnextBtn
+        
+        if UI_SelStation.page == 2:
+            if gVar.darkMode:
+                icon = QIcon(img_path + "offPreBtn_dark.png")
+            else:
+                icon = QIcon(img_path + "offPreBtn.png")
+            GpreBtn.setIcon(icon)
 
-        if gVar.clickAble:
-            if UI_SelStation.page == 2:
-                if gVar.darkMode:
-                    icon = QIcon(img_path + "offPreBtn_dark.png")
-                else:
-                    icon = QIcon(img_path + "offPreBtn.png")
-                GpreBtn.setIcon(icon)
+            for i in range(0, 5):
+                for j in range(0, 3):
+                    selStat[i][j].setText(impStat[i][j])
+            
+            UI_SelStation.page = 1
+        elif UI_SelStation.page == 3:
+            if gVar.darkMode:
+                icon = QIcon(img_path + "nextBtn_dark.png")
+            else:
+                icon = QIcon(img_path + "nextBtn.png")
+            GnextBtn.setIcon(icon)
 
-                for i in range(0, 5):
-                    for j in range(0, 3):
-                        selStat[i][j].setText(impStat[i][j])
-                
-                UI_SelStation.page = 1
-            elif UI_SelStation.page == 3:
-                if gVar.darkMode:
-                    icon = QIcon(img_path + "nextBtn_dark.png")
-                else:
-                    icon = QIcon(img_path + "nextBtn.png")
-                GnextBtn.setIcon(icon)
-
-                for i in range(0, 5):
-                    for j in range(0, 3):
-                        selStat[i][j].setText(impStat[i+5][j])
-                
-                UI_SelStation.page = 2
+            for i in range(0, 5):
+                for j in range(0, 3):
+                    selStat[i][j].setText(impStat[i+5][j])
+            
+            UI_SelStation.page = 2
 
     def clicked_nextBtn(self):
         global GpreBtn, GnextBtn
         global selStat
 
-        if gVar.clickAble:
-            if UI_SelStation.page == 1:
-                if gVar.darkMode:
-                    icon = QIcon(img_path + "preBtn_dark.png")
-                else:
-                    icon = QIcon(img_path + "PreBtn.png")
-                GpreBtn.setIcon(icon)
+        if UI_SelStation.page == 1:
+            if gVar.darkMode:
+                icon = QIcon(img_path + "preBtn_dark.png")
+            else:
+                icon = QIcon(img_path + "PreBtn.png")
+            GpreBtn.setIcon(icon)
 
-                for i in range(0, 5):
-                    for j in range(0, 3):
-                        selStat[i][j].setText(impStat[i+5][j])
-                
-                UI_SelStation.page = 2
-            elif UI_SelStation.page == 2:
-                for i in range(0, 5):
-                    for j in range(0, 3):
-                        if (impStat[i+10][j] == ""):
-                            selStat[i][j].setText("")
-                        else:
-                            selStat[i][j].setText(impStat[i+10][j])
-                
-                if gVar.darkMode:
-                    icon = QIcon(img_path + "offNextBtn_dark.png")
-                else:
-                    icon = QIcon(img_path + "offNextBtn.png")
-                GnextBtn.setIcon(icon)
+            for i in range(0, 5):
+                for j in range(0, 3):
+                    selStat[i][j].setText(impStat[i+5][j])
+            
+            UI_SelStation.page = 2
+        elif UI_SelStation.page == 2:
+            for i in range(0, 5):
+                for j in range(0, 3):
+                    if (impStat[i+10][j] == ""):
+                        selStat[i][j].setText("")
+                    else:
+                        selStat[i][j].setText(impStat[i+10][j])
+            
+            if gVar.darkMode:
+                icon = QIcon(img_path + "offNextBtn_dark.png")
+            else:
+                icon = QIcon(img_path + "offNextBtn.png")
+            GnextBtn.setIcon(icon)
 
-                UI_SelStation.page = 3
+            UI_SelStation.page = 3

@@ -1,5 +1,4 @@
-import pyautogui, pygame, pyttsx3
-from gtts import gTTS
+import pyautogui
 from datetime import *
 
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
@@ -9,42 +8,92 @@ from PyQt5.QtWidgets import *
 
 
 class gVar:
+    retry = 0
     mode = "touch"
     locateSelf = True
     currentP = "main"
     pause = 0
-    menu = 1
-    face_cnt = 0
-    no_face_cnt = 0
+    menu = 0
+    face_first = True
+    no_face_first = True
     firstAsk = True
     darkMode = False
-    clickAble = True
     
     depStat = "서울"
     arrStat = ""
     depDate = datetime.today().strftime("%Y%m%d")
     depTime = datetime.today().strftime("%H%M")
-    knd = "KTX"
-    notExist = False
+    arrTime = ""
+    trainInfo = ""
+    adultPrice = 0
+    knd = ""
+    
+    adultNum = 0
+    childNum = 0
+    oldNum = 0
+    disabledNum = 0
+    totalPrice = 0
+    totalPeople = 0
+    
+    seatNum = 0
+    preSeatNum = 0
+    leftSeat = 32
+    selSeats = []
+    selCar = "1호차"
 
+    phoneNum = ""
+
+    ampm = ""
+    day = ""
+    hour = ""
+    minute = ""
+    
     def gVarInit():
+        gVar.retry = 0
         gVar.mode = "touch"
         gVar.locateSelf = True
         gVar.currentP = "main"
         gVar.pause = 0
-        gVar.menu = 1
-        gVar.face_cnt = 0
-        gVar.no_face_cnt = 0
+        gVar.menu = 0
+        gVar.face_first = True
+        gVar.no_face_first = True
         gVar.firstAsk = True
         gVar.darkMode = False
-        gVar.clickAble = True
 
         gVar.depStat = "서울"
         gVar.arrStat = ""
         gVar.depDate = datetime.today().strftime("%Y%m%d")
         gVar.depTime = datetime.today().strftime("%H%M")
-        gVar.knd = "KTX"
-        gVar.notExist = False
+        gVar.arrTime = ""
+        gVar.knd = ""
+        gVar.trainInfo = ""
+
+        gVar.adultNum = 0
+        gVar.childNum = 0
+        gVar.oldNum = 0
+        gVar.disabledNum = 0
+        gVar.adultPrice = 0
+        gVar.totalPrice = 0
+        gVar.totalPeople = 0
+        
+        gVar.seatNum = 0
+        gVar.preSeatNum = 0
+        gVar.leftSeat = 32
+        gVar.selSeats = []
+        gVar.selCar = "1호차"
+
+        gVar.phoneNum = ""
+
+        gVar.ampm = ""
+        gVar.day = ""
+        gVar.hour = ""
+        gVar.minute = ""
+
+    def discount(originPrice, pType):
+        if pType == 1:
+            int(round(int(originPrice) * 0.5, -2))
+        elif pType == 2:
+            int(round(int(originPrice) * 0.7, -2))
 
 
 # 현재 화면의 크기
@@ -73,7 +122,6 @@ largeFont = "font-size: " + largefontSize + "px;"
 extraLargefontSize = str(int(h*0.03))
 extraLargeFont = "font-size: " + extraLargefontSize + "px;"
 
-
 # color palette
 blue = "rgb(41, 121, 255)"
 white = "rgb(255, 255, 255)"
@@ -85,29 +133,8 @@ darkGray = "rgb(35, 38, 41)"
 red = "rgb(255, 0, 0)"
 lightBlue = "rgb(0, 176, 255)"
 
-def pyTTS(txt):
-    engine = pyttsx3.init()
-    engine.say(txt)
-    engine.runAndWait()
-
-def gglTTS(txt, fn):
-    text = txt
-    tts = gTTS(text=text, lang='ko')
-    tts.save(fn + ".mp3")
-
-    music_file = fn + ".mp3"   # mp3 or mid file
-
-    freq = 16000    # sampling rate, 44100(CD), 16000(Naver TTS), 24000(google TTS)
-    bitsize = -16   # signed 16 bit. support 8,-8,16,-16
-    channels = 1    # 1 is mono, 2 is stereo
-    buffer = 2048   # number of samples (experiment to get right sound)
-
-    # default : pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=4096)
-    pygame.mixer.init(freq, bitsize, channels, buffer)
-    pygame.mixer.music.load(music_file)
-    pygame.mixer.music.play()
-
-    clock = pygame.time.Clock()
-    while pygame.mixer.music.get_busy():
-        clock.tick(30)
-    pygame.mixer.quit()
+class myColor:
+    primary_color = blue
+    secondary_color = white
+    primary_text_color = white
+    secondary_text_color = black
