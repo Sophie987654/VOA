@@ -67,9 +67,3 @@
 - **대화형 인터페이스 도입**  
   현재의 비대화형 키오스크에서 ChatGPT와 같은 대화형 인공지능을 활용한 인터페이스로 발전시켜 더 다양한 환경에서 활용될 수 있도록 할 수 있습니다.
 
-## 설치 방법
-
-1. **필요한 라이브러리 설치**
-
-```bash
-pip install google-cloud-speech google-cloud-texttospeech mediapipe
